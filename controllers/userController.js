@@ -1,8 +1,7 @@
-
 import Registration from '../models/user.model.js';
 import sendEmail from '../services/emailService.js';
 import Course from '../models/Courses.model.js';
-
+import response from '../utils/responseFunction.js';
 
 const register = async (req, res) => {
   try {
@@ -20,13 +19,8 @@ const register = async (req, res) => {
       source
     } = req.body;
 
-    
-
     if (!name || !email || !contact || !address || !city || !date || !course || !gender || !qualification || !institute || !source) {
-      return res.status(400).json({
-        success: false,
-        message: 'All fields are required'
-      });
+      return response(res, 400, 'All fields are required', null, false);
     }
 
     const registration = await Registration.create({
@@ -59,23 +53,13 @@ const register = async (req, res) => {
       emailHTML
     );
 
-    res.status(201).json({
-      success: true,
-      message: 'Registration successful',
-      data: registration
-    });
+    return response(res, 201, 'Registration successful', registration);
 
   } catch (error) {
-    console.error(' Registration error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Registration failed',
-      error: error.message
-    });
+    console.error('Registration error:', error);
+    return response(res, 500, 'Registration failed', error.message, false);
   }
 };
-
-
 
 export const searchCourses = async (req, res) => {
   try {
@@ -119,7 +103,7 @@ export const searchCourses = async (req, res) => {
       .sort({ createdAt: -1 })
       .lean();
     
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       count: courses.length,
       data: courses
@@ -127,13 +111,8 @@ export const searchCourses = async (req, res) => {
     
   } catch (error) {
     console.error('Search error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error searching courses',
-      error: error.message
-    });
+    return response(res, 500, 'Error searching courses', error.message, false);
   }
 };
-
 
 export default register;

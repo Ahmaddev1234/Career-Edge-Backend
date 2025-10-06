@@ -1,5 +1,5 @@
-import z from 'zod'
-
+import z from 'zod';
+import response from '../utils/responseFunction.js';
 
 const courseSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -14,16 +14,12 @@ const courseSchema = z.object({
   topics: z.string().min(1, "Topics are required"),
 });
 
-
 const courseValidator = (req, res, next) => {
   try {
     courseSchema.parse(req.body);
 
     if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        message: "Course image is required",
-      });
+      return response(res, 400, "Course image is required", null, false);
     }
 
     next();
@@ -36,11 +32,7 @@ const courseValidator = (req, res, next) => {
       });
     }
 
-    res.status(500).json({
-      success: false,
-      message: "Server error",
-      error: error.message,
-    });
+    return response(res, 500, "Server error", error.message, false);
   }
 };
 

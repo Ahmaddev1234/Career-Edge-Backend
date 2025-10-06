@@ -2,6 +2,7 @@ import Course from '../models/Courses.model.js';
 import CourseContent from '../models/courseContent.model.js';
 import CourseOutline from '../models/courseOutline.model.js';
 import cloudinary from '../config/cloudinary.js';
+import response from '../utils/responseFunction.js';
 
 // Create Course
 const createCourse = async (req, res) => {
@@ -9,7 +10,7 @@ const createCourse = async (req, res) => {
     const { title, level, category, schedule, price, description, duration, label, sections, topics } = req.body;
 
     if (!req.file) {
-      return res.status(400).json({ message: 'Course image is required' });
+      return response(res, 400, 'Course image is required', null, false);
     }
 
     const courseData = {
@@ -45,21 +46,13 @@ const createCourse = async (req, res) => {
     const courseContent = await CourseContent.findOne({ courseId });
     const courseOutline = await CourseOutline.findOne({ courseId });
 
-    res.status(201).json({
-      success: true,
-      message: 'Course created successfully',
-      data: {
-        course: fullCourse,
-        content: courseContent,
-        outline: courseOutline
-      }
+    return response(res, 201, 'Course created successfully', {
+      course: fullCourse,
+      content: courseContent,
+      outline: courseOutline
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error creating course',
-      error: error.message
-    });
+    return response(res, 500, 'Error creating course', error.message, false);
   }
 };
 
@@ -68,17 +61,13 @@ const getAllCourses = async (req, res) => {
   try {
     const courses = await Course.find();
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       count: courses.length,
       data: courses
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching courses',
-      error: error.message
-    });
+    return response(res, 500, 'Error fetching courses', error.message, false);
   }
 };
 
@@ -89,29 +78,19 @@ const getCourseById = async (req, res) => {
     const course = await Course.findById(courseId);
 
     if (!course) {
-      return res.status(404).json({
-        success: false,
-        message: 'Course not found'
-      });
+      return response(res, 404, 'Course not found', null, false);
     }
 
     const courseContent = await CourseContent.findOne({ courseId });
     const courseOutline = await CourseOutline.findOne({ courseId });
 
-    res.status(200).json({
-      success: true,
-      data: {
-        course,
-        content: courseContent,
-        outline: courseOutline
-      }
+    return response(res, 200, 'Course fetched successfully', {
+      course,
+      content: courseContent,
+      outline: courseOutline
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching course',
-      error: error.message
-    });
+    return response(res, 500, 'Error fetching course', error.message, false);
   }
 };
 
@@ -122,10 +101,7 @@ const updateCourse = async (req, res) => {
 
     const course = await Course.findById(courseId);
     if (!course) {
-      return res.status(404).json({
-        success: false,
-        message: 'Course not found'
-      });
+      return response(res, 404, 'Course not found', null, false);
     }
 
     const { title, level, category, schedule, price, description, duration, label, sections, topics } = req.body;
@@ -173,21 +149,13 @@ const updateCourse = async (req, res) => {
     const courseContent = await CourseContent.findOne({ courseId });
     const courseOutline = await CourseOutline.findOne({ courseId });
 
-    res.status(200).json({
-      success: true,
-      message: 'Course updated successfully',
-      data: {
-        course: updatedCourse,
-        content: courseContent,
-        outline: courseOutline
-      }
+    return response(res, 200, 'Course updated successfully', {
+      course: updatedCourse,
+      content: courseContent,
+      outline: courseOutline
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error updating course',
-      error: error.message
-    });
+    return response(res, 500, 'Error updating course', error.message, false);
   }
 };
 
@@ -198,10 +166,7 @@ const deleteCourse = async (req, res) => {
 
     const course = await Course.findById(courseId);
     if (!course) {
-      return res.status(404).json({
-        success: false,
-        message: 'Course not found'
-      });
+      return response(res, 404, 'Course not found', null, false);
     }
 
     const imagePublicId = course.image.split('/').pop().split('.')[0];
@@ -211,16 +176,9 @@ const deleteCourse = async (req, res) => {
     await CourseOutline.findOneAndDelete({ courseId });
     await Course.findByIdAndDelete(courseId);
 
-    res.status(200).json({
-      success: true,
-      message: 'Course and related data deleted successfully'
-    });
+    return response(res, 200, 'Course and related data deleted successfully', null);
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error deleting course',
-      error: error.message
-    });
+    return response(res, 500, 'Error deleting course', error.message, false);
   }
 };
 
